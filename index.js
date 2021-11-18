@@ -22,6 +22,7 @@ async function run() {
         const database = client.db('PotteryStore');
         const productsCollection = database.collection('products');
         const OrderCollection = database.collection('orderList');
+        const ReviewCollection = database.collection('reviews');
 
 
         // Get all products api
@@ -30,6 +31,15 @@ async function run() {
             const products = await cursor.toArray();
             res.send(products);
         });
+
+        // Get all review api
+        app.get('/reviews', async (req, res) => {
+            const cursor = ReviewCollection.find({});
+            const products = await cursor.toArray();
+            res.send(products);
+        });
+
+
 
         // Get product by ID api
         app.get('/products/:id', async (req, res) => {
@@ -43,6 +53,14 @@ async function run() {
         app.post('/users', async (req, res) => {
             const orderDetails = req.body;
             const result = await OrderCollection.insertOne(orderDetails);
+            res.send(result);
+
+        });
+
+        // Post review api
+        app.post('/review', async (req, res) => {
+            const myReview = req.body;
+            const result = await ReviewCollection.insertOne(myReview);
             res.send(result);
 
         });
@@ -64,8 +82,15 @@ async function run() {
             const result = await OrderCollection.deleteOne(query);
 
             res.send(result);
-        })
+        });
 
+        // Post products Api
+        app.post('/product', async (req, res) => {
+            const productDetails = req.body;
+            const result = await productsCollection.insertOne(productDetails);
+            res.send(result);
+
+        });
 
 
 
