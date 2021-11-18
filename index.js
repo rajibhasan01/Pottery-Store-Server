@@ -5,6 +5,7 @@ const port = process.env.PORT || 5000;
 const { MongoClient } = require('mongodb');
 const { parse } = require('dotenv');
 require('dotenv').config();
+const ObjectId = require('mongodb').ObjectId;
 
 
 app.use(cors());
@@ -20,7 +21,7 @@ async function run() {
         await client.connect();
         const database = client.db('PotteryStore');
         const productsCollection = database.collection('products');
-        console.log("database connected successfully");
+        const OrderCollection = database.collection('orderList');
 
 
         // Get all products api
@@ -28,6 +29,24 @@ async function run() {
             const cursor = productsCollection.find({});
             const products = await cursor.toArray();
             res.send(products);
+        });
+
+        // Get product by ID api
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.findOne(query);
+            res.send(result);
+        });
+
+        // Post Product api
+        app.post('/users', async (req, res) => {
+            const orderDetails = req.body;
+            const result = await OrderCollection.insertOne(orderDetails);
+            res.send(result);
+            console.log(result);
+
+            console.log(orderDetails);
         })
 
 
