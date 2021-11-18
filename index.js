@@ -92,6 +92,28 @@ async function run() {
 
         });
 
+        // Get all orders api
+        app.get('/allOrders', async (req, res) => {
+            const cursor = OrderCollection.find({});
+            const allItems = await cursor.toArray();
+            res.send(allItems);
+        });
+
+        // Update orders by id api
+        app.put('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateStatus = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    status: updateStatus[0]
+                }
+            };
+
+            const result = await OrderCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        });
 
 
     }
