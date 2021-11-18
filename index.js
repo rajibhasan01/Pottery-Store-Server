@@ -49,12 +49,29 @@ async function run() {
             res.send(result);
         });
 
+        // Get product by Product_code api
+        app.get('/product', async (req, res) => {
+            const search = parseInt(req.query.search);
+            const query = { product_code: search };
+            const result = await productsCollection.find(query).toArray();
+            res.send(result);
+            console.log(result);
+        });
+
         // Post Product api
         app.post('/users', async (req, res) => {
             const orderDetails = req.body;
             const result = await OrderCollection.insertOne(orderDetails);
             res.send(result);
 
+        });
+
+        // Delete product by id Api
+        app.delete('/deleteproduct/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productsCollection.deleteOne(query);
+            res.send(result);
         });
 
         // Post review api
