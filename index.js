@@ -44,9 +44,26 @@ async function run() {
             const orderDetails = req.body;
             const result = await OrderCollection.insertOne(orderDetails);
             res.send(result);
-            console.log(result);
 
-            console.log(orderDetails);
+        });
+
+
+        // Get Product by id Api
+        app.get('/myOrders', async (req, res) => {
+            const search = req.query.search;
+            const query = { email: search };
+            const myOrder = await OrderCollection.find(query).toArray();
+            res.send(myOrder);
+
+        });
+
+        // Delete Order by id Api
+        app.delete('/myOrders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await OrderCollection.deleteOne(query);
+
+            res.send(result);
         })
 
 
