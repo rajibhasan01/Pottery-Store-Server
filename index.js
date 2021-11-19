@@ -1,11 +1,38 @@
 const express = require('express');
 const cors = require('cors');
+const admin = require("firebase-admin");
 const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient } = require('mongodb');
 const { parse } = require('dotenv');
 require('dotenv').config();
 const ObjectId = require('mongodb').ObjectId;
+
+
+const serviceAccount = require('./potteryshop3-firebase-adminsdk.json');
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
+async function verifyToken(req, res, next) {
+    if (req.headers.authorization?.startsWith('Bearer ')) {
+        const token = req.headers.authorization.split(' ')[1];
+
+
+        try {
+            const decodedUser = await admin.auth().verifyIdToken(token);
+            req.decodedEmail = decodedUser.email;
+        }
+        catch {
+
+        }
+
+
+    }
+
+    next();
+}
 
 
 app.use(cors());
@@ -170,14 +197,25 @@ async function run() {
         });
 
         // update user api
-        app.put('/makeAdmin/admin', async (req, res) => {
+        app.put('/makeAdmin/admin', verifyToken, async (req, res) => {
             const user = req.body;
-            const filter = { email: user.email };
-            const updateDoc = {
-                $set: { role: 'admin' }
-            };
-            const result = await usersCollection.updateOne(filter, updateDoc);
-            res.json(result);
+            const requester = req.decodedEmail;
+            if (requester) {
+                const requesterAccount = await usersCollection.findOne({ email: requester });
+                if (requesterAccount.role === 'admin') {
+
+                    const filter = { email: user.email };
+                    const updateDoc = {
+                        $set: { role: 'admin' }
+                    };
+                    const result = await usersCollection.updateOne(filter, updateDoc);
+                    res.json(result);
+
+                }
+            }
+            else {
+                res.status(403).json({ message: 'You do not have access to make admin' });
+            }
         });
 
 
