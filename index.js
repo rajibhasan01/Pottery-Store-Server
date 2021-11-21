@@ -113,7 +113,8 @@ async function run() {
         // Post Product api
         app.post('/users', async (req, res) => {
             const orderDetails = req.body;
-            const result = await OrderCollection.insertOne(orderDetails);
+            const options = { ordered: true };
+            const result = await OrderCollection.insertMany(orderDetails, options);
             res.send(result);
 
         });
