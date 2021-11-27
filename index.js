@@ -51,6 +51,7 @@ async function run() {
         const OrderCollection = database.collection('orderList');
         const ReviewCollection = database.collection('reviews');
         const usersCollection = database.collection('users');
+        const promosCollection = database.collection('promos');
 
 
         // Post user api
@@ -89,6 +90,14 @@ async function run() {
             const cursor = ReviewCollection.find({});
             const products = await cursor.toArray();
             res.send(products);
+        });
+
+        // search promo api
+        app.get('/promo', async (req, res) => {
+            const search = req.query.search;
+            const query = { promoCode: search };
+            const discount = await promosCollection.find(query).toArray();
+            res.send(discount);
         });
 
 
