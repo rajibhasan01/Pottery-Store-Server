@@ -8,6 +8,8 @@ const { parse } = require('dotenv');
 require('dotenv').config();
 const ObjectId = require('mongodb').ObjectId;
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
+
 
 const serviceAccount = require('./potteryshop3-firebase-adminsdk.json');
 
@@ -77,19 +79,42 @@ async function run() {
         });
 
 
+        // Post Product api
+        app.post('/users', async (req, res) => {
+            const orderDetails = req.body;
+            const options = { ordered: true };
+            const result = await OrderCollection.insertMany(orderDetails, options);
+            res.send(result);
 
-        // Get all products api
-        app.get('/products', async (req, res) => {
-            const cursor = productsCollection.find({});
-            const products = await cursor.toArray();
-            res.send(products);
         });
+
+        // update user api
+        app.put('/userList', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.json(result);
+        });
+
+
 
         // Get all review api
         app.get('/reviews', async (req, res) => {
             const cursor = ReviewCollection.find({});
             const products = await cursor.toArray();
             res.send(products);
+        });
+
+        // Post review api
+        app.post('/review', async (req, res) => {
+            const myReview = req.body;
+            const result = await ReviewCollection.insertOne(myReview);
+            res.send(result);
+
         });
 
         // search promo api
@@ -100,6 +125,13 @@ async function run() {
             res.send(discount);
         });
 
+
+        // Get all products api
+        app.get('/products', async (req, res) => {
+            const cursor = productsCollection.find({});
+            const products = await cursor.toArray();
+            res.send(products);
+        });
 
 
         // Get product by ID api
@@ -119,14 +151,15 @@ async function run() {
             console.log(result);
         });
 
-        // Post Product api
-        app.post('/users', async (req, res) => {
-            const orderDetails = req.body;
-            const options = { ordered: true };
-            const result = await OrderCollection.insertMany(orderDetails, options);
+
+        // Post products Api
+        app.post('/product', async (req, res) => {
+            const productDetails = req.body;
+            const result = await productsCollection.insertOne(productDetails);
             res.send(result);
 
         });
+
 
         // Delete product by id Api
         app.delete('/deleteproduct/:id', async (req, res) => {
@@ -136,13 +169,7 @@ async function run() {
             res.send(result);
         });
 
-        // Post review api
-        app.post('/review', async (req, res) => {
-            const myReview = req.body;
-            const result = await ReviewCollection.insertOne(myReview);
-            res.send(result);
 
-        });
 
 
         // Get Product by id Api
@@ -163,13 +190,29 @@ async function run() {
             res.send(result);
         });
 
-        // Post products Api
-        app.post('/product', async (req, res) => {
-            const productDetails = req.body;
-            const result = await productsCollection.insertOne(productDetails);
-            res.send(result);
-
+        // get order details by id api
+        app.get('/myOrders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await OrderCollection.findOne(query);
+            res.json(result);
         });
+
+        // update order for payment details
+        app.put('/Order/:id', async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    payment: payment
+                }
+            };
+            const result = await OrderCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+
 
         // Get all orders api
         app.get('/allOrders', async (req, res) => {
@@ -194,17 +237,6 @@ async function run() {
             res.send(result);
         });
 
-        // update user api
-        app.put('/userList', async (req, res) => {
-            const user = req.body;
-            const filter = { email: user.email };
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: user
-            }
-            const result = await usersCollection.updateOne(filter, updateDoc, options);
-            res.json(result);
-        });
 
         // update user api
         app.put('/makeAdmin/admin', verifyToken, async (req, res) => {
@@ -227,6 +259,20 @@ async function run() {
                 res.status(403).json({ message: 'You do not have access to make admin' });
             }
         });
+
+        app.post("/create-payment-intent", async (req, res) => {
+            const paymentInfo = req.body;
+            const amount = paymentInfo.discount_amount * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: amount,
+                payment_method_types: ['card']
+            });
+            res.json({
+                clientSecret: paymentIntent.client_secret
+            });
+        })
 
 
 
