@@ -1,4 +1,4 @@
-class Invoice {
+class Product {
   title?: string;
   amount?: number;
   cashType?: string;
@@ -7,16 +7,16 @@ class Invoice {
   createdAt?: Date;
   createdBy?: string;
 
-  private static invoice: Invoice;
+  private static product: Product;
 
   private constructor() {}
 
   public static getInstance() {
-    if (!Invoice.invoice) {
-      Invoice.invoice = new Invoice();
+    if (!Product.product) {
+      Product.product = new Product();
     }
-    return Invoice.invoice;
+    return Product.product;
   }
 }
 
-export { Invoice };
+export { Product };

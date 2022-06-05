@@ -3,8 +3,8 @@ export const configData = {
   frontendUrl: 'https://hr.braincraftapps.com',
 
   mongo: {
-    url: 'mongodb://localhost:27017',
-    dbName: 'boiler-plate',
+    url: `mongodb+srv://potteryStore:rfSf2bJAAdAUle7W@cluster0.nzlp2.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`,
+    dbName: 'PotteryStore',
   },
   google: {
     clientId:

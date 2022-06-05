@@ -1,39 +1,41 @@
-import { Invoice } from '../../models/model.invoice';
+import { Product } from '../../models/model.product';
 import { ObjectId, MongoClient } from 'mongodb';
 import { ConfigService } from '../utility/configService';
 
 const config = ConfigService.getInstance().getConfig();
 
-export class DbInvoice {
-  private static dbInvoice: DbInvoice;
+export class DbProduct {
+  private static dbProduct: DbProduct;
   private collectionName: string;
   constructor() {
-    this.collectionName = 'invoice';
+    this.collectionName = 'products';
   }
   /**
    * getInstance
    */
   public static getInstance() {
-    if (!DbInvoice.dbInvoice) {
-      DbInvoice.dbInvoice = new DbInvoice();
+    if (!DbProduct.dbProduct) {
+      DbProduct.dbProduct = new DbProduct();
     }
-    return DbInvoice.dbInvoice;
+    return DbProduct.dbProduct;
   }
   private async getDbConnection() {
-    const dbConnection = await new MongoClient(config.mongo.url).connect();
+    const client = new MongoClient(config.mongo.url);
+
+    const dbConnection = await client.connect();
     return dbConnection;
   }
   /**
-   * createInvoice
+   * createProduct
    */
-  public async CreateInvoice(invoice: Invoice) {
+  public async CreateProduct(product: Product) {
     try {
       return await new Promise(async (resolve, reject) => {
         const dbConn = await this.getDbConnection();
         const db = dbConn.db(config.mongo.dbName);
         const dbCollection = db.collection(this.collectionName);
-        invoice.createdAt = new Date();
-        const result = await dbCollection.insertOne(invoice);
+        product.createdAt = new Date();
+        const result = await dbCollection.insertOne(product);
         if (result) {
           resolve(result);
         } else {
@@ -42,10 +44,10 @@ export class DbInvoice {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in CreateInvoice method of DbInvoice class: ', error);
+      console.log('error in CreateProduct method of DbProduct class: ', error);
     }
   }
-  public async GetAllInvoice() {
+  public async GetAllProduct() {
     try {
       return await new Promise(async (resolve, reject) => {
         const dbConn = await this.getDbConnection();
@@ -63,17 +65,17 @@ export class DbInvoice {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in GetAllInvoice method of DbInvoice class: ', error);
+      console.log('error in GetAllProduct method of DbProduct class: ', error);
     }
   }
-  public async GetInvoiceById(invoiceId: string) {
+  public async GetProductById(productId: string) {
     try {
       return await new Promise(async (resolve, reject) => {
         const dbConn = await this.getDbConnection();
         const db = dbConn.db(config.mongo.dbName);
         const dbCollection = db.collection(this.collectionName);
         const result = await dbCollection.findOne({
-          _id: new ObjectId(invoiceId),
+          _id: new ObjectId(productId),
         });
         if (result) {
           resolve(result);
@@ -83,18 +85,18 @@ export class DbInvoice {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in GetAllInvoice method of DbInvoice class: ', error);
+      console.log('error in GetAllProduct method of DbProduct class: ', error);
     }
   }
-  public async EditInvoice(invoiceId: string, invoiceData: Invoice) {
+  public async EditProduct(productId: string, productData: Product) {
     try {
       return await new Promise(async (resolve, reject) => {
-        const { imageName, imagePath, title, amount, cashType } = invoiceData;
+        const { imageName, imagePath, title, amount, cashType } = productData;
         const dbConn = await this.getDbConnection();
         const db = dbConn.db(config.mongo.dbName);
         const dbCollection = db.collection(this.collectionName);
         const result = await dbCollection.updateOne(
-          { _id: new ObjectId(invoiceId) },
+          { _id: new ObjectId(productId) },
           {
             $set: {
               imageName,
@@ -113,7 +115,7 @@ export class DbInvoice {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in GetAllInvoice method of DbInvoice class: ', error);
+      console.log('error in GetAllProduct method of DbProduct class: ', error);
     }
   }
 }
