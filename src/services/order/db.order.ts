@@ -1,23 +1,23 @@
-import { Product } from '../../models/model.product';
+import { Order } from '../../models/model.orders';
 import { ObjectId, MongoClient } from 'mongodb';
 import { ConfigService } from '../utility/configService';
 
 const config = ConfigService.getInstance().getConfig();
 
-export class DbProduct {
-  private static dbProduct: DbProduct;
+export class DbOrder {
+  private static dbOrder: DbOrder;
   private collectionName: string;
   constructor() {
-    this.collectionName = 'products';
+    this.collectionName = 'orderList';
   }
   /**
    * getInstance
    */
   public static getInstance() {
-    if (!DbProduct.dbProduct) {
-      DbProduct.dbProduct = new DbProduct();
+    if (!DbOrder.dbOrder) {
+      DbOrder.dbOrder = new DbOrder();
     }
-    return DbProduct.dbProduct;
+    return DbOrder.dbOrder;
   }
   private async getDbConnection() {
     const client = new MongoClient(config.mongo.url);
@@ -26,16 +26,17 @@ export class DbProduct {
     return dbConnection;
   }
   /**
-   * createProduct
+   * createorder
    */
-  public async CreateProduct(product: Product) {
+  public async CreateOrder(order:any) {
     try {
       return await new Promise(async (resolve, reject) => {
         const dbConn = await this.getDbConnection();
         const db = dbConn.db(config.mongo.dbName);
         const dbCollection = db.collection(this.collectionName);
-        product.createdAt = new Date();
-        const result = await dbCollection.insertOne(product);
+        order.createdAt = new Date();
+        const options = { ordered: true };
+        const result = await dbCollection.insertMany(order, options);
         if (result) {
           resolve(result);
         } else {
@@ -44,10 +45,10 @@ export class DbProduct {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in CreateProduct method of DbProduct class: ', error);
+      console.log('error in Createorder method of dbOrder class: ', error);
     }
   }
-  public async GetAllProduct() {
+  public async GetAllOrder() {
     try {
       return await new Promise(async (resolve, reject) => {
         const dbConn = await this.getDbConnection();
@@ -65,17 +66,17 @@ export class DbProduct {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in GetAllProduct method of DbProduct class: ', error);
+      console.log('error in GetAllorder method of dbOrder class: ', error);
     }
   }
-  public async GetProductById(productId: string) {
+  public async GetOrderById(orderId: string) {
     try {
       return await new Promise(async (resolve, reject) => {
         const dbConn = await this.getDbConnection();
         const db = dbConn.db(config.mongo.dbName);
         const dbCollection = db.collection(this.collectionName);
         const result = await dbCollection.findOne({
-          _id: new ObjectId(productId),
+          _id: new ObjectId(orderId),
         });
         if (result) {
           resolve(result);
@@ -85,17 +86,17 @@ export class DbProduct {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in GetAllProduct method of DbProduct class: ', error);
+      console.log('error in GetAllorder method of dbOrder class: ', error);
     }
   }
 
-  public async GetProductBySearch(search:any) {
+  public async GetOrderBySearch(search:any) {
     try {
       return await new Promise(async (resolve, reject) => {
         const dbConn = await this.getDbConnection();
         const db = dbConn.db(config.mongo.dbName);
         const dbCollection = db.collection(this.collectionName);
-        const query = { product_code: search };
+        const query = { order_code: search };
         const result = await dbCollection.find(query).toArray();
         if (result) {
           resolve(result);
@@ -105,19 +106,19 @@ export class DbProduct {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in GetAllProduct method of DbProduct class: ', error);
+      console.log('error in GetAllorder method of dbOrder class: ', error);
     }
   }
 
-  public async EditProduct(productId: string, productData: Product) {
+  public async EditOrder(orderId: string, orderData: Order) {
     try {
       return await new Promise(async (resolve, reject) => {
-        const { imageName, imagePath, title, amount, cashType } = productData;
+        const { imageName, imagePath, title, amount, cashType } = orderData;
         const dbConn = await this.getDbConnection();
         const db = dbConn.db(config.mongo.dbName);
         const dbCollection = db.collection(this.collectionName);
         const result = await dbCollection.updateOne(
-          { _id: new ObjectId(productId) },
+          { _id: new ObjectId(orderId) },
           {
             $set: {
               imageName,
@@ -136,18 +137,18 @@ export class DbProduct {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in GetAllProduct method of DbProduct class: ', error);
+      console.log('error in GetAllorder method of dbOrder class: ', error);
     }
   }
 
-  public async DeleteProductById(productId: string) {
+  public async DeleteOrderById(orderId: string) {
     try {
       return await new Promise(async (resolve, reject) => {
         const dbConn = await this.getDbConnection();
         const db = dbConn.db(config.mongo.dbName);
         const dbCollection = db.collection(this.collectionName);
         const result = await dbCollection.deleteOne({
-          _id: new ObjectId(productId),
+          _id: new ObjectId(orderId),
         });
         if (result) {
           resolve(result);
@@ -157,7 +158,7 @@ export class DbProduct {
         await dbConn.close();
       });
     } catch (error) {
-      console.log('error in GetAllProduct method of DbProduct class: ', error);
+      console.log('error in GetAllorder method of dbOrder class: ', error);
     }
   }
 

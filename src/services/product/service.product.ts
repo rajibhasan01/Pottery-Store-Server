@@ -18,7 +18,7 @@ export class ProductService implements ProductInterface {
       return await new Promise((resolve, reject) => {
         dbProduct
           .CreateProduct(productData)
-          .then((res) => resolve('Product Added Successfully'))
+          .then((res) => resolve(res))
           .catch((err) => reject('Failed to add Product. Please try again'));
       });
     } catch (err) {
@@ -71,4 +71,40 @@ export class ProductService implements ProductInterface {
       );
     }
   }
+
+  async GetProductBySearch(search: any) {
+    try {
+      return await new Promise((resolve, reject) => {
+        dbProduct
+          .GetProductBySearch(search)
+          .then((result) => {
+            resolve(result);
+          })
+          .catch((err) => reject(err));
+      });
+    } catch (err) {
+      console.log(
+        'error in GetProductById method of ProductService Class: ',
+        err
+      );
+    }
+  }
+  async DeleteProductById(productId: string) {
+    try {
+      return await new Promise((resolve, reject) => {
+        dbProduct
+          .DeleteProductById(productId)
+          .then((result) => {
+            resolve(result);
+          })
+          .catch((err) => reject(err));
+      });
+    } catch (err) {
+      console.log(
+        'error in GetProductById method of ProductService Class: ',
+        err
+      );
+    }
+  }
+
 }

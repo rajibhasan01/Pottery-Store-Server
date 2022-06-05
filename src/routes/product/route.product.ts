@@ -20,7 +20,7 @@ productRoute.get('/', (req, res) => {
     });
 });
 
-productRoute.get('/:id', (req, res) => {
+productRoute.get('/products/:id', (req, res) => {
   productService
     .GetProductById(req.params.id)
     .then((result) => {
@@ -28,6 +28,52 @@ productRoute.get('/:id', (req, res) => {
         res.send(result);
       } else {
         res.send({"msg": "Welcome to home page"});
+      }
+    })
+    .catch((err) => {
+      console.log(`Can't get the data: ${err}`);
+    });
+});
+
+productRoute.get('/product', (req:any, res) => {
+  const search = Number(req.query.search);
+  productService
+    .GetProductBySearch(search)
+    .then((result) => {
+      if (result) {
+        res.send(result);
+      } else {
+        res.send({"msg": "Welcome to home page"});
+      }
+    })
+    .catch((err) => {
+      console.log(`Can't get the data: ${err}`);
+    });
+});
+
+productRoute.post('/product', (req, res) => {
+  productService
+    .AddProduct(req.body)
+    .then((result) => {
+      if (result) {
+        res.send(result);
+      } else {
+        res.send({"msg": "Welcome to home page"});
+      }
+    })
+    .catch((err) => {
+      console.log(`Can't get the data: ${err}`);
+    });
+});
+
+productRoute.post('/deleteproduct/:id', (req, res) => {
+  productService
+    .AddProduct(req.body)
+    .then((result) => {
+      if (result) {
+        res.send(result);
+      } else {
+        res.send({"msg": "Error happen while deleting"});
       }
     })
     .catch((err) => {
